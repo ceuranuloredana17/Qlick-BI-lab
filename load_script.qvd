@@ -1,0 +1,112 @@
+LOAD
+    OrderID,
+    CustomerID,
+    EmployeeID,
+    OrderDate,
+    RequiredDate,
+    ShippedDate,
+    ShipVia,
+    Freight,
+    ShipName,
+    ShipAddress,
+    ShipCity,
+    ShipRegion,
+    ShipPostalCode,
+    ShipCountry
+FROM [lib://personal:DataFiles/Orders.qvd]
+(qvd);
+
+LOAD
+    OrderID,
+    ProductID,
+    UnitPrice,
+    Quantity,
+    Discount,
+    UnitPrice*Quantity*(1-Discount) as SalesAmount
+FROM [lib://personal:DataFiles/OrderDetails.xlsx]
+(ooxml, embedded labels, table is Sheet1);
+
+
+
+LOAD
+    ProductID,
+    ProductName,
+    SupplierID,
+    CategoryID,
+    QuantityPerUnit,
+    UnitPrice as ProductUnitPrice,
+    UnitsInStock,
+    UnitsOnOrder,
+    ReorderLevel,
+    Discontinued
+FROM [lib://personal:DataFiles/Products.qvd]
+(qvd);
+
+LOAD
+    CategoryID,
+    CategoryName,
+    Description
+FROM [lib://personal:DataFiles/categories.txt]
+(txt, codepage is 28591, embedded labels, delimiter is ',', msq);
+
+LOAD
+    SupplierID,
+    CompanyName AS SuppliersCompanyName,
+    ContactName AS SuppliersContactName,
+    ContactTitle AS SuppliersContactTitle,
+    Address AS SuppliersAddress,
+    City AS SuppliersCity,
+    Region AS SuppliersRegion,
+    PostalCode AS SuppliersPostalCode,
+    Country AS SuppliersCountry,
+    Phone AS SuppliersPhone,
+    Fax AS SuppliersFax,
+    HomePage AS SuppliersHomePage
+FROM [lib://personal:DataFiles/Suppliers.qvd]
+(qvd);
+
+LOAD
+    EmployeeID,
+    FirstName AS EmployeesFirstName,
+    Title AS EmployeesTitle,
+    TitleOfCourtesy AS EmployeesTitleOfCourtesy,
+    BirthDate AS EmployeesBirthDate,
+    HireDate AS EmployeesHireDate,
+    Address AS EmployeesAddress,
+    City AS EmployeesCity,
+    Region AS EmployeesRegion,
+    PostalCode AS EmployeesPostalCode,
+    Country AS EmployeesCountry,
+    HomePhone AS EmployeesHomePhone
+FROM [lib://personal:DataFiles/Employees.qvd]
+(qvd);
+
+LOAD
+    CustomerID,
+    CompanyName,
+    ContactName,
+    ContactTitle,
+    Address,
+    City,
+    Region,
+    PostalCode,
+    Country,
+    Phone,
+    Fax
+FROM [lib://personal:DataFiles/Customers.qvd]
+(qvd);
+
+Calendar:
+DECLARE FIELD DEFINITION TAGGED '$date'
+ Parameters
+ first_month_of_year = 1
+ Fields
+ Year($1) As Year Tagged ('$numeric'),
+ Month($1) as Month Tagged ('$numeric'),
+ Date($1) as Date Tagged ('$date'),
+ Week($1) as Week Tagged ('$numeric'),
+ Weekday($1) as Weekday Tagged ('$numeric'),
+ DayNumberOfYear($1, first_month_of_year) as DayNumberOfYear Tagged ('$numeric'),
+ Day($1) as Day Tagged ('$numeric'),
+ date(monthstart($1),'MMM/YYYY') as MonthYear Tagged ('$text)');
+DERIVE FIELDS FROM FIELDS OrderDate,ShippedDate, RequiredDate USING Calendar;
